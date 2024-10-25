@@ -36,7 +36,7 @@ setMethod("writeImzML", "ImzMeta",
 	# process positions
 	if ( !is.null(positions) )
 	{
-		positions <- as.data.frame(apply(positions, 2L, as.character))
+		positions <- as.data.frame(apply(positions, 2L, .format_values))
 		if ( ncol(positions) == 2L ) {
 			names(positions) <- c("position x", "position y")
 		} else if ( ncol(positions) == 3L ) {
@@ -244,7 +244,7 @@ setMethod("writeImzML", "ImzMeta",
 	mzArrays[["external array length"]] <- rep_len(mza$extent, n)
 	mzArrays[["external encoded length"]] <- rep_len(xlen, n)
 	mzArrays[["binary data type"]] <- rep_len(mza$type, n)
-	mzArrays[] <- lapply(mzArrays, as.character)
+	mzArrays[] <- lapply(mzArrays, .format_values)
 	# get intensity metadata
 	intensityArrays <- data.frame(row.names=seq_len(n))
 	ia <- as.data.frame(atomdata(intensity))
@@ -253,7 +253,7 @@ setMethod("writeImzML", "ImzMeta",
 	intensityArrays[["external array length"]] <- ia$extent
 	intensityArrays[["external encoded length"]] <- xlen
 	intensityArrays[["binary data type"]] <- ia$type
-	intensityArrays[] <- lapply(intensityArrays, as.character)
+	intensityArrays[] <- lapply(intensityArrays, .format_values)
 	# get checksum and uuid as 8-4-4-4-12 formatted string
 	path <- path(mz)
 	checksum <- checksum(path, algo=algo)
@@ -301,6 +301,10 @@ setMethod("writeImzML", "ImzMeta",
 	metadata[["run"]][["spectrumList"]][["mzArrays"]] <- meta$mzArrays
 	metadata[["run"]][["spectrumList"]][["intensityArrays"]] <- meta$intensityArrays
 	metadata
+}
+
+.format_values <- function(x) {
+	ifelse(is.na(x), NA_character_, format(x, scientific=FALSE))
 }
 
 #### Deparse generic imzML tags ####
